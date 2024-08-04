@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap");
+
+@layer base {
+    html {
+        font-family: "Plus Jakarta Sans", sans-serif;
+    }
+}
+
+@layer components {
+    .container-nav {
+        @apply py-6 px-4; /* Default padding */
+    }
+
+    .container-index {
+        @apply py-6 px-4; /* Default padding */
+    }
+
+    .materi-content {
+        @apply py-16 px-4; /* Default padding */
+    }
+
+    @screen sm {
+        .container-nav,
+        .container-index {
+            @apply px-8; /* Small screens and up */
+        }
+
+        .materi-content {
+            @apply px-8; /* Small screens and up */
+        }
+    }
+
+    @screen md {
+        .container-nav,
+        .container-index {
+            @apply px-16; /* Medium screens and up */
+        }
+
+        .materi-content {
+            @apply px-16; /* Medium screens and up */
+        }
+    }
+
+    @screen lg {
+        .container-nav {
+            @apply px-24; /* Large screens and up */
+        }
+
+        .container-index,
+        .materi-content {
+            @apply px-32; /* Large screens and up */
+        }
+    }
+
+    @screen xl {
+        .container-nav {
+            @apply px-32; /* Extra large screens and up */
+        }
+
+        .container-index {
+            @apply px-60; /* Extra large screens and up */
+        }
+
+        .materi-content {
+            @apply px-32; /* Extra large screens and up */
+        }
+    }
+
+    /* .simplebar-content {
+        @apply flex flex-col gap-4;
+    } */
+}
+#review {
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column;
+    gap: 16px;
+}
+
+@media (max-width: 1024px) {
+    #sidebar {
+        transform: translateX(-90%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 50;
+        width: 350px; /* Lebar sidebar saat tersembunyi */
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-visible #sidebar {
+        transform: translateX(0);
+    }
+}
+
+@layer utilities {
+    .materi-sidebar-collapsed .feature,
+    .materi-sidebar-collapsed .circle-trigger,
+    .materi-sidebar-collapsed .text-feature,
+    .latihan-sidebar-collapsed .feature,
+    .latihan-sidebar-collapsed .circle-trigger,
+    .latihan-sidebar-collapsed .text-feature {
+        @apply hidden;
+    }
+
+    @media (max-width: 1024px) {
+        .materi-sidebar-collapsed .feature,
+        .materi-sidebar-collapsed .text-feature,
+        .latihan-sidebar-collapsed .feature,
+        .latihan-sidebar-collapsed .text-feature {
+            @apply inline text-center !important;
+        }
+    }
+}
+
+/* Tambahkan kelas CSS untuk lebar sidebar */
+.materi-sidebar-collapsed {
+    width: 260px; /* Lebar sidebar saat diperkecil */
+}
+
+.materi-sidebar-expanded {
+    width: 500px; /* Lebar sidebar saat diperluas, sesuaikan dengan kebutuhan Anda */
+}
+
+.latihan-sidebar-collapsed {
+    width: 320px; /* Lebar sidebar saat diperkecil */
+}
+
+.latihan-sidebar-expanded {
+    width: 600px; /* Lebar sidebar saat diperluas, sesuaikan dengan kebutuhan Anda */
+}
+
+/* Tambahkan transisi untuk animasi */
+#sidebar {
+    transition: width 0.3s ease, transform 0.3s ease;
+}
+
+/* Transisi untuk rotasi SVG */
+.own-rotate-180 {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+#mobile-menu {
+    display: none;
+}
+
+.navbar-visible #mobile-menu {
+    display: flex;
+}
