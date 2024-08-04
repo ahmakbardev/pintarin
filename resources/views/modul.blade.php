@@ -127,7 +127,7 @@
     <div id="komentarModal"
         class="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-sm hidden justify-center items-center transition-all ease-in-out duration-300">
         <div
-            class="bg-white rounded-lg p-6 w-96 transform transition ease-in-out duration-300 translate-y-10 opacity-0 scale-95">
+            class="bg-white rounded-lg p-6 w-full max-w-2xl transform transition ease-in-out duration-300 translate-y-10 opacity-0 scale-95">
             <h2 class="text-xl font-semibold mb-4">Komentar Anda</h2>
             <div id="komentarContainer" class="overflow-y-auto max-h-64 mb-4"></div>
             <div class="flex gap-2">
@@ -151,9 +151,11 @@
         var dosenId = {{ Auth::user()->dosen_id }};
         var userId = {{ Auth::id() }};
         var hasMessages = false;
+        var isBound = false;
+        var lastMessageId = null; // Store the last message ID to avoid duplicates
 
         // Ensure Pusher is loaded
-        const pusher = new Pusher('acd4ddbbe09a210bb25e', {
+        const pusher = new Pusher('b13119368dad85510365', {
             cluster: 'ap1',
             authEndpoint: '/pusher/auth',
             auth: {
@@ -164,10 +166,16 @@
         });
 
         const channel = pusher.subscribe('private-chat.' + dosenId);
-        channel.bind('App\\Events\\MessageSent', function(data) {
-            addMessage(data.chat);
-            showToast('New message received!');
-        });
+
+        function bindEvent() {
+            if (!isBound) {
+                channel.bind('App\\Events\\MessageSent', function(data) {
+                    validateAndAddMessage(data.chat);
+                    showToast('New message received!');
+                });
+                isBound = true;
+            }
+        }
 
         function fetchMessages() {
             $.ajax({
@@ -185,8 +193,17 @@
                     } else {
                         hasMessages = false;
                     }
+                    bindEvent(); // Bind event after fetching messages
                 }
             });
+        }
+
+        function validateAndAddMessage(message) {
+            // Check if the message ID is the same as the last message ID
+            if (message.id !== lastMessageId) {
+                addMessage(message);
+                lastMessageId = message.id; // Update the last message ID
+            }
         }
 
         function addMessage(message) {
@@ -277,5 +294,7 @@
 
         fetchMessages();
     </script>
+
+
 
 @endsection

@@ -30,6 +30,9 @@ class ChatController extends Controller
 
     public function fetchMessages($dosen_id)
     {
-        return Chat::where('dosen_id', $dosen_id)->get();
+        $user_id = Auth::id(); // Get the authenticated user's ID
+        return Chat::where('dosen_id', $dosen_id)
+            ->where('user_id', $user_id) // Filter by authenticated user's ID
+            ->get();
     }
 }
