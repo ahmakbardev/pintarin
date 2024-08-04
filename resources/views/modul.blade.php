@@ -102,17 +102,13 @@
         <div class="saling-review">
             <h1 class="text-xl">Saling Review</h1>
             <div class="grid grid-cols-3 gap-6 my-4">
-                <a href="{{ route('saling-review') }}"
-                    class="py-3 shadow flex justify-center rounded-xl ring-1 ring-primary hover:bg-primary group transition-all ease-in-out hover:cursor-pointer">
-                    <p class="w-2/3 text-nowrap truncate text-center text-primary group-hover:text-white">Itamara Shofinia
-                        Weladis Ain</p>
-                </a>
-                <div class="py-3 shadow flex justify-center rounded-xl">
-                    <p class="w-2/3 text-nowrap truncate text-center">Mumtaz Aaliyah Fasya</p>
-                </div>
-                <div class="py-3 shadow flex justify-center rounded-xl">
-                    <p class="w-2/3 text-nowrap truncate text-center">Ahmad Akbar Mubarak</p>
-                </div>
+                @foreach ($users as $user)
+                    <a href="{{ route('saling-review', ['userId' => $user->id]) }}"
+                        class="py-3 shadow flex justify-center rounded-xl ring-1 ring-primary hover:bg-primary group transition-all ease-in-out hover:cursor-pointer">
+                        <p class="w-2/3 text-nowrap truncate text-center text-primary group-hover:text-white">
+                            {{ $user->name }}</p>
+                    </a>
+                @endforeach
             </div>
         </div>
         <div class="diskusi">

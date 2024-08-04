@@ -89,8 +89,16 @@ class ModulController extends Controller
         $allMateriCompleted = count($completedMateriIds) === $materis->count();
         $postTestScore = $progress ? $progress->post_test_score : null;
 
-        return view('modul', compact('modul', 'materis', 'postTests', 'tasks', 'completedMateriIds', 'allMateriCompleted', 'postTestScore'));
+        // Fetch all users for the review
+        $users = DB::table('users')
+            ->join('progress', 'users.id', '=', 'progress.user_id')
+            ->where('progress.modul_id', $id)
+            ->select('users.id', 'users.name', 'users.nim')
+            ->get();
+
+        return view('modul', compact('modul', 'materis', 'postTests', 'tasks', 'completedMateriIds', 'allMateriCompleted', 'postTestScore', 'users'));
     }
+
 
     public function showMateri($id)
     {

@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ModulController;
 use App\Http\Controllers\PostTestController;
 use App\Http\Controllers\PusherAuthController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TugasProgressController;
 use Illuminate\Support\Facades\Route;
 
@@ -76,14 +77,12 @@ Route::get('/modul/materi/latihan', function () {
 })->name('latihan');
 
 
-Route::get('/review', function () {
-    return view('saling-review.index');
-})->name('saling-review');
+Route::get('/review/{userId}', [ReviewController::class, 'index'])->name('saling-review');
+Route::get('/review/detail-options/{progress_id}', [ReviewController::class, 'detailOptions'])->name('detail-review-option');
+Route::get('/convert-ppt-to-pdf/{id}', [ReviewController::class, 'convertPptToPdf']);
+
+
 
 Route::get('/review/detail', function () {
     return view('saling-review.detail');
 })->name('detail-review');
-
-Route::get('/review/detail-options', function () {
-    return view('saling-review.detail-option');
-})->name('detail-review-option');
