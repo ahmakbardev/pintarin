@@ -12,7 +12,11 @@ class ModulController extends Controller
 {
     public function index()
     {
-        $dosenId = Auth::user()->dosen_id;
+        $user = Auth::user();
+        $dosenId = $user->dosen_id;
+
+        // Ambil dosen berdasarkan dosen_id
+        $dosen = DB::table('dosens')->where('id', $dosenId)->first();
 
         // Ambil modul yang sesuai dengan dosen_id
         $moduls = DB::table('moduls')
@@ -36,7 +40,37 @@ class ModulController extends Controller
             return $modul;
         });
 
-        return view('index', compact('moduls'));
+        // Panggil fungsi untuk cek judul dan proposal
+        $judulProposalStatus = $this->cekJudulDanProposal();
+
+        return view('index', compact('moduls', 'judulProposalStatus', 'dosen'));
+    }
+
+    // Fungsi baru untuk cek tabel judul dan proposal berdasarkan user_id
+    public function cekJudulDanProposal()
+    {
+        $userId = Auth::id(); // Mendapatkan user ID yang sedang login
+
+        // Cek apakah ada judul PTK yang diajukan oleh user ini
+        $judul = DB::table('judul')
+            ->where('user_id', $userId)
+            ->first();
+
+        // Cek apakah ada proposal PTK yang diajukan oleh user ini
+        $proposal = null;
+        if ($judul) {
+            $proposal = DB::table('proposal')
+                ->where('judul_id', $judul->id)
+                ->first();
+        }
+
+        // Return status apakah user sudah mengajukan judul dan proposal
+        return [
+            'judul_ada' => $judul ? true : false,
+            'proposal_ada' => $proposal ? true : false,
+            'judul' => $judul ? $judul->judul : null,
+            'proposal_status' => $proposal ? $proposal->status : null,
+        ];
     }
 
     public function getModulsByCategory(Request $request, $category)
@@ -128,6 +162,9 @@ class ModulController extends Controller
         // Check if all materi are completed
         $completedMateriIds = $progress->materi_ids ?? [];
         $allMateriCompleted = count($completedMateriIds) === $materis->count();
+        // Tambahkan logika untuk memeriksa ketersediaan post-test
+        $postTestAvailable = DB::table('post_tests')->where('modul_id', $modul->id)->exists();
+
 
         // Get current index
         $currentIndex = $materis->search(function ($item) use ($id) {
@@ -138,7 +175,7 @@ class ModulController extends Controller
         $previousMateri = $currentIndex > 0 ? $materis[$currentIndex - 1] : null;
         $nextMateri = $currentIndex < $materis->count() - 1 ? $materis[$currentIndex + 1] : null;
 
-        return view('materi', compact('materi', 'materis', 'modul', 'previousMateri', 'nextMateri', 'completedMateriIds', 'allMateriCompleted'))->with('currentMateri', $materi);
+        return view('materi', compact('materi', 'materis', 'modul', 'previousMateri', 'nextMateri', 'completedMateriIds', 'allMateriCompleted', 'postTestAvailable'))->with('currentMateri', $materi);
     }
 
 

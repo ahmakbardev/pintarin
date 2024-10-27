@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="shortcut icon" href="{{ asset('assets/logo/logo.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('assets/logo/logo_fix.png') }}" type="image/x-icon">
     <title>Pintarin</title>
     <!-- Append version number to CSS file name -->
     <link rel="stylesheet" href="{{ asset('css/app.css?v=1.01') }}">
@@ -31,7 +31,7 @@
             @include('layouts.components.navbar.navbar')
         @endif
         <div class="flex h-full">
-            @if (in_array(Route::currentRouteName(), ['materi', 'post-test', 'answer']))
+            @if (in_array(Route::currentRouteName(), ['materi', 'post-test', 'answer', 'PTK-proposal', 'PTK-revisi-proposal', 'PTK-seminar', 'PTK-judul', 'PTK-judul-revisi']))
                 @include('layouts.components.sidebar.sidebar')
             @endif
             @yield('content')

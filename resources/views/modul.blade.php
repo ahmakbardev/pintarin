@@ -125,7 +125,7 @@
         <div
             class="bg-white rounded-lg p-6 w-full max-w-2xl transform transition ease-in-out duration-300 translate-y-10 opacity-0 scale-95">
             <h2 class="text-xl font-semibold mb-4">Komentar Anda</h2>
-            <div id="komentarContainer" class="overflow-y-auto max-h-64 mb-4"></div>
+            <div id="komentarContainer" class="overflow-y-auto max-h-64 mb-4" data-simplebar></div>
             <div class="flex gap-2">
                 <textarea id="modalKomentarTextarea" class="border p-2 flex-grow rounded-md" placeholder="Ketik komentar Anda..."></textarea>
                 <button id="modalKirimKomentarButton" class="bg-primary text-white px-4 py-2 rounded-md">Kirim</button>
@@ -151,7 +151,7 @@
         var lastMessageId = null; // Store the last message ID to avoid duplicates
 
         // Ensure Pusher is loaded
-        const pusher = new Pusher('acd4ddbbe09a210bb25e', {
+        const pusher = new Pusher('b13119368dad85510365', {
             cluster: 'ap1',
             authEndpoint: '/pusher/auth',
             auth: {
@@ -168,6 +168,7 @@
                 channel.bind('App\\Events\\MessageSent', function(data) {
                     validateAndAddMessage(data.chat);
                     showToast('New message received!');
+                    scrollToBottom();
                 });
                 isBound = true;
             }
@@ -186,6 +187,7 @@
                         });
                         $('#komentarTextarea').hide();
                         $('#kirimKomentarButton').text('Lihat Diskusi');
+                        scrollToBottom();
                     } else {
                         hasMessages = false;
                     }
@@ -199,14 +201,24 @@
             if (message.id !== lastMessageId) {
                 addMessage(message);
                 lastMessageId = message.id; // Update the last message ID
+                scrollToBottom();
             }
         }
 
         function addMessage(message) {
             var sender = message.sender === 'user' ? 'Anda' : 'Dosen';
-            $('#komentarContainer').append('<div class="py-2 px-3 mb-2 border rounded-lg"><p><strong>' + sender +
-                ':</strong> ' + message.message +
-                '</p></div>');
+            var messageClass = message.sender === 'user' ? 'bg-info-50 ml-auto' : 'bg-white';
+            var alignment = message.sender === 'user' ? 'ml-auto' : '';
+            $('#komentarContainer').append('<div class="flex gap-2 items-center my-2' + alignment + '"><div class="' +
+                messageClass +
+                ' flex flex-col gap-px px-4 py-1 rounded-lg shadow-md w-fit my-2 mx-2"><h4 class="text-sm font-medium">' +
+                sender + '</h4><p class="text-xs">' + message.message +
+                '</p></div></div>');
+        }
+
+        function scrollToBottom() {
+            var container = $('#komentarContainer');
+            container.scrollTop(container.prop('scrollHeight'));
         }
 
         $('#kirimKomentarButton').on('click', function() {
@@ -266,6 +278,7 @@
                 modal.addClass('flex').removeClass('hidden');
                 modalContent.removeClass('translate-y-10 opacity-0 scale-95').addClass(
                     'translate-y-0 opacity-100 scale-100');
+                scrollToBottom(); // Scroll to the bottom when the modal opens
             }, 10);
         }
 
@@ -290,7 +303,4 @@
 
         fetchMessages();
     </script>
-
-
-
 @endsection

@@ -39,27 +39,31 @@
                     </div>
                 @endforeach
 
-                <div class="flex gap-3 items-center relative">
-                    <div class="bg-white relative flex items-center justify-center rounded-full">
-                        <div
-                            class="circle-trigger bg-white w-3 aspect-square rounded-full relative flex items-center justify-center">
+                @if ($postTestAvailable)
+                    <div class="flex gap-3 items-center relative">
+                        <div class="bg-white relative flex items-center justify-center rounded-full">
+                            <div
+                                class="circle-trigger bg-white w-3 aspect-square rounded-full relative flex items-center justify-center">
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex flex-col gap-5 items-center flex-1">
-                        @if ($allMateriCompleted)
-                            <a href="{{ route('post-test', ['modulId' => $modul->id]) }}" class="block">
+                        <div class="flex flex-col gap-5 items-center flex-1">
+                            @if ($allMateriCompleted)
+                                <a href="{{ route('post-test', ['modulId' => $modul->id]) }}" class="block">
+                                    <div
+                                        class="bg-white py-4 px-4 rounded-xl flex flex-col max-w-80 gap-1 items-center">
+                                        <p class="text-feature text-center">Post Test</p>
+                                    </div>
+                                </a>
+                            @else
                                 <div class="bg-white py-4 px-4 rounded-xl flex flex-col max-w-80 gap-1 items-center">
                                     <p class="text-feature text-center">Post Test</p>
+                                    <p class="text-red-500 text-xs">Pelajari semua materi terlebih dahulu!</p>
                                 </div>
-                            </a>
-                        @else
-                            <div class="bg-white py-4 px-4 rounded-xl flex flex-col max-w-80 gap-1 items-center">
-                                <p class="text-feature text-center">Post Test</p>
-                                <p class="text-red-500 text-xs">Pelajari semua materi terlebih dahulu!</p>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
+
             </div>
         </div>
     </div>

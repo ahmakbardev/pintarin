@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SalingReviewMessageSent;
+use App\Models\SalingReviewChat;
 use App\Models\TugasProgress;
 use App\Models\User;
 use Dompdf\Dompdf;
@@ -35,8 +37,10 @@ class ReviewController extends Controller
             abort(404, 'Task progress not found');
         }
 
-        // Fetch user and task details
-        $user = DB::table('users')->where('id', $tugasProgress->user_id)->first();
+        // Fetch user along with their advisor (dosen) details using the relationship
+        $user = User::with('dosen')->where('id', $tugasProgress->user_id)->first();
+
+        // Fetch task details
         $task = DB::table('tasks')->where('id', $tugasProgress->task_id)->first();
 
         // Fetch all progress entries for the same user and task
@@ -46,6 +50,48 @@ class ReviewController extends Controller
             ->get();
 
         return view('saling-review.detail-option', compact('tugasProgress', 'tugasProgressList', 'user', 'task'));
+    }
+
+
+    // Controller
+    public function fetchMessages($progress_id)
+    {
+        $messages = SalingReviewChat::where('progress_id', $progress_id)
+            ->with('user:id,name') // Include user data for each message
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Format messages to include 'user_name' field
+        $formattedMessages = $messages->map(function ($message) {
+            return [
+                'id' => $message->id,
+                'message' => $message->message,
+                'user_id' => $message->user_id,
+                'created_at' => $message->created_at->format('H:i'),
+                'user_name' => $message->user->name,
+            ];
+        });
+
+        return response()->json($formattedMessages);
+    }
+
+
+    public function sendReviewMessage(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+            'progress_id' => 'required|integer|exists:tugas_progress,id',
+        ]);
+
+        $chat = SalingReviewChat::create([
+            'message' => $request->message,
+            'progress_id' => $request->progress_id,
+            'user_id' => Auth::id(),
+        ]);
+
+        broadcast(new SalingReviewMessageSent($chat))->toOthers();
+
+        return response()->json(['status' => 'Message Sent!']);
     }
 
 

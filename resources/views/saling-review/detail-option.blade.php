@@ -8,21 +8,21 @@
                     <img src="{{ asset('assets/images/profile/default-profile.png') }}"
                         class="w-20 aspect-square rounded-full" alt="">
                     <div class="flex flex-col gap-2">
-                        <h1 class="text-xl font-medium text-center">Itamara Shofinia Weladis Aini</h1>
+                        <h1 class="text-xl font-medium text-center">{{ $user->name }}</h1>
                         <div class="flex flex-col gap-2">
                             <div class="grid grid-cols-2">
                                 <div class="flex gap-3">
                                     <img src="{{ asset('assets/icons/school.svg') }}" alt="">
                                     <p>NIM</p>
                                 </div>
-                                <p>: 200535626862</p>
+                                <p>: {{ $user->nim }}</p>
                             </div>
                             <div class="grid grid-cols-2">
                                 <div class="flex gap-3">
                                     <img src="{{ asset('assets/icons/school.svg') }}" alt="">
                                     <p>Dosen PA</p>
                                 </div>
-                                <p>: Dyah Lestari, S.T., M.Eng.</p>
+                                <p>: {{ $user->dosen->name }}</p>
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,6 @@
                             </div>
                         @endforeach
                     </div>
-
                 </div>
             </div>
             <button id="toggle-review" class="bg-primary text-white py-4 px-14 rounded-xl font-medium">Lihat Review</button>
@@ -66,16 +65,19 @@
                 </div>
             </div>
         </div>
+
+        <link rel="stylesheet" href="https://unpkg.com/simplebar@latest/dist/simplebar.min.css" />
+        <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/pptx2html"></script>
+        <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
         <script>
             var originalContent = document.getElementById('post-test-container').innerHTML;
             var postTestContainer = document.getElementById('post-test-container');
             var toggleButton = document.getElementById('toggle-review');
 
-
-            document.addEventListener('DOMContentLoaded', function() {
-                // Set the default PDF to be displayed
+            $(document).ready(function() {
                 @if (count($tugasProgressList) > 0)
                     var defaultPdfPath = '{{ asset('storage/' . $tugasProgressList[0]->pdf_path) }}';
                     embedFile(defaultPdfPath, 'application/pdf', 'pdf-0', 'ppt-0');
@@ -84,23 +86,17 @@
 
             function embedFile(filePath, fileType, activePdfId, activePptId) {
                 var fileEmbed = document.getElementById('file-embed');
-
-                // Remove active class from all items
                 document.querySelectorAll('.bg-info-50').forEach(function(element) {
                     element.classList.remove('ring-2', 'ring-primary');
                 });
-
-                // Add active class to the clicked item
                 document.getElementById(activePdfId).classList.add('ring-2', 'ring-primary');
                 document.getElementById(activePptId).classList.add('ring-2', 'ring-primary');
 
                 if (fileType === 'application/vnd.ms-powerpoint') {
-                    // Use an online viewer for PPT
                     var pptViewerUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(filePath);
                     fileEmbed.src = pptViewerUrl;
                     fileEmbed.type = '';
                 } else {
-                    // Use default embedding for PDF
                     fileEmbed.src = filePath;
                     fileEmbed.type = fileType;
                 }
@@ -115,25 +111,11 @@
                                 <div class="flex flex-col gap-2">
                                     <h1 class="text-xl">Diskusi</h1>
                                 </div>
-                                <div id="chat-review" class="bg-white flex flex-col gap-4 py-3 px-6 rounded-lg ring-1 ring-info-100"
-                                    data-simplebar style="max-height: 400px;">
-                                    @for ($i = 0; $i < 5; $i++)
-                                    <div class="flex gap-2 items-center">
-                                        <img src="{{ asset('assets/images/profile/profile-2.png') }}" class="w-8 h-8 rounded-full object-cover">
-                                        <div class="bg-white flex flex-col gap-px px-4 py-1 rounded-lg shadow-md my-3 w-fit">
-                                            <h4 class="text-sm font-medium">Akbar</h4>
-                                            <p class="text-xs">Pesan akan muncul disini {{ $i + 1 }}</p>
-                                        </div>
-                                    </div>
-                                    @endfor
-                                    <div class="flex gap-2 items-center ml-auto w-fit">
-                                        <div class="bg-info-50 flex flex-col gap-px px-4 py-1 rounded-lg shadow-md my-3 w-fit">
-                                            <h4 class="text-sm font-medium">Akbar</h4>
-                                            <p class="text-xs">Pesan terakhir akan muncul disini</p>
-                                        </div>
-                                        <img src="{{ asset('assets/images/profile/profile-2.png') }}" class="w-8 h-8 rounded-full object-cover">
-                                    </div>
+                                <div id="chat-review" class="bg-white flex flex-col gap-4 py-3 px-6 rounded-lg ring-1 ring-info-100 w-full overflow-y-auto"
+                                    style="max-height: 400px;">
                                 </div>
+
+
                                 <div class="flex gap-2">
                                     <textarea id="chat-input" rows="1"
                                         class="py-3 px-4 border w-full border-slate-300 text-xs rounded-xl outline-none focus:ring-1 focus:ring-inset focus:ring-primary transition-all ease-in-out hover:ring-1 hover:ring-blue-300 hover:ring-inset"
@@ -149,40 +131,82 @@
                                 'opacity-0', 'translate-y-10');
                             document.querySelector('#post-test-container .transform').classList.add(
                                 'opacity-100', 'translate-y-0');
-                        }, 50); // small delay to ensure the transition is visible
+                        }, 50);
                         toggleButton.innerText = 'Tutup Review';
 
-                        document.getElementById('send-chat').addEventListener('click', function() {
-                            var chatInput = document.getElementById('chat-input');
-                            var chatReview = document.getElementById('chat-review');
-
-                            if (chatInput.value.trim() !== '') {
-                                var messageDiv = document.createElement('div');
-                                messageDiv.classList.add('bg-info-50', 'flex', 'ml-auto', 'flex-col',
-                                    'gap-2',
-                                    'px-4',
-                                    'py-2', 'rounded-lg', 'shadow-md', 'w-fit');
-                                messageDiv.innerHTML =
-                                    `<h4 class="text-base font-medium">Akbar <span class="text-xs text-grayScale-300 ml-3">Just now</span></h4><p class="text-sm">${chatInput.value}</p>`;
-                                chatReview.appendChild(messageDiv);
-
-                                chatInput.value = '';
-                                chatReview.scrollTop = chatReview.scrollHeight;
-                            }
-                        });
-                    }, 300); // duration should match transition duration
+                        initializeChat();
+                    }, 300);
                 } else {
                     postTestContainer.classList.add('opacity-0', 'blur-md', '-translate-y-10');
                     setTimeout(function() {
-                        postTestContainer.innerHTML = originalContent; // Revert back to the original content
+                        postTestContainer.innerHTML = originalContent;
                         postTestContainer.classList.remove('opacity-0', 'blur-md', '-translate-y-10');
                         postTestContainer.classList.add('opacity-100', 'translate-y-0');
-                    }, 300); // duration should match transition duration
+                    }, 300);
                     toggleButton.innerText = 'Lihat Review';
                 }
             }
 
+            function initializeChat() {
+                const progressId = {{ $tugasProgress->id }};
+                const pusher = new Pusher('{{ env('PUSHER_APP_KEY') }}', {
+                    cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+                });
+
+                const channel = pusher.subscribe(`saling-review.${progressId}`);
+                const chatReview = $('#chat-review');
+
+                // Fetch existing messages with jQuery AJAX
+                fetchMessages(progressId);
+
+                channel.bind('App\\Events\\SalingReviewMessageSent', function(data) {
+                    appendMessage(data.message, data.user_name, data.created_at, data.user_id);
+                });
+
+                $('#send-chat').on('click', function() {
+                    const message = $('#chat-input').val();
+                    if (!message.trim()) return;
+
+                    $.post('{{ route('send-review-message') }}', {
+                        message: message,
+                        progress_id: progressId,
+                        _token: '{{ csrf_token() }}'
+                    }, function() {
+                        $('#chat-input').val('');
+                    });
+                });
+            }
+
+            function appendMessage(message, userName, createdAt, userId) {
+                const isCurrentUser = userId === {{ Auth::id() }};
+                const messageClass = isCurrentUser ? 'bg-info-50' : 'bg-white';
+                const alignmentClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
+                const chatReview = $('#chat-review');
+
+                const messageDiv = $(`
+        <div class="flex ${alignmentClass} w-fit">
+            <div class="${messageClass} flex flex-col gap-px px-4 py-2 rounded-lg shadow-md my-1 overflow-hidden">
+                <h4 class="text-sm font-medium">${userName} <span class="text-xs text-gray-400">${createdAt}</span></h4>
+                <p class="text-xs">${message}</p>
+            </div>
+        </div>
+    `);
+                chatReview.append(messageDiv);
+                chatReview.scrollTop(chatReview.prop('scrollHeight')); // Scroll otomatis ke bawah
+            }
+
+            function fetchMessages(progressId) {
+                $.get(`/fetch-review-messages/${progressId}`, function(messages) {
+                    const chatReview = $('#chat-review');
+                    chatReview.empty();
+                    messages.forEach(function(message) {
+                        appendMessage(message.message, message.user_name, message.created_at, message.user_id);
+                    });
+                });
+            }
+
             toggleButton.addEventListener('click', toggleContent);
         </script>
+
     </div>
 @endsection
